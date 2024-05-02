@@ -3,7 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/cats.iml" filepath="$PROJECT_DIR$/.idea/modules/cats.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/cats-build.iml" filepath="$PROJECT_DIR$/.idea/modules/cats-build.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/cats.cats-build.iml" filepath="$PROJECT_DIR$/.idea/modules/cats.cats-build.iml" />
     </modules>
   </component>
 </project>

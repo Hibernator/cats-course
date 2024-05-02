@@ -4,7 +4,7 @@ import cats.Eval
 
 object Playground {
 
-  val meaningOfLife = Eval.later {
+  private val meaningOfLife = Eval.later {
     println("Learning Cats: computing abstractions and the meaning of life...")
     42
   }

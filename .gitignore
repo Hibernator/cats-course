@@ -53,6 +53,8 @@ cmake-build-*/
 
 # IntelliJ
 out/
+.idea
+.idea/**
 
 # mpeltonen/sbt-idea plugin
 .idea_modules/
@@ -143,6 +145,7 @@ project/plugins/project/
 .history
 .cache
 .lib/
+.bsp
 
 ### Scala ###
 

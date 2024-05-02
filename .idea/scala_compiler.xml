@@ -3,6 +3,17 @@
   <component name="ScalaCompilerConfiguration">
     <profile name="sbt 1" modules="cats">
       <option name="higherKinds" value="true" />
+      <parameters>
+        <parameter value="-rewrite" />
+        <parameter value="-Wunused:all" />
+        <parameter value="--deprecation" />
+        <parameter value="--explain" />
+        <parameter value="--feature" />
+        <parameter value="-Werror" />
+        <parameter value="-Xsemanticdb" />
+        <parameter value="-semanticdb-target" />
+        <parameter value="$PROJECT_DIR$/target/scala-3.4.1/meta" />
+      </parameters>
     </profile>
   </component>
 </project>
