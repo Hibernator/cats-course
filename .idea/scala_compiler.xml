@@ -5,7 +5,6 @@
       <option name="higherKinds" value="true" />
       <parameters>
         <parameter value="-rewrite" />
-        <parameter value="-Wunused:all" />
         <parameter value="--deprecation" />
         <parameter value="--explain" />
         <parameter value="--feature" />

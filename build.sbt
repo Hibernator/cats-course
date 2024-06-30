@@ -16,7 +16,7 @@ libraryDependencies ++= Seq(
 scalacOptions ++= Seq(
   "-language:higherKinds",
   "-rewrite",
-  "-Wunused:all",
+//  "-Wunused:all",
   "--deprecation",
   "--explain",
   "--feature",
