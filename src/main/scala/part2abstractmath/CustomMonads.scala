@@ -1,7 +1,6 @@
 package part2abstractmath
 
 import scala.annotation.tailrec
-import scala.collection.mutable
 
 object CustomMonads {
 

@@ -2,7 +2,7 @@ name := "cats"
 
 version := "0.1"
 
-scalaVersion := "3.4.2"
+scalaVersion := "3.5.2"
 semanticdbEnabled := true
 semanticdbVersion := scalafixSemanticdb.revision
 scalafixOnCompile := true

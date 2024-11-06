@@ -6,11 +6,13 @@ import scala.concurrent.{ExecutionContext, Future}
 object MonadTransformers {
 
   // normally, I would need to unwrap the options but since it's a nested monad, I can avoid this
+  // monad transformers allow using map and flatMap on nested monads without unwrapping them
+  // it's basically a conveniency API over nested monadic values
   def sumAllOptions(values: List[Option[Int]]): Int = ???
 
   // Option transformer
   import cats.data.OptionT // OptionTransformer
-  import cats.instances.list.given // fetch an implicit OptionT[List]
+  import cats.instances.list.given // fetch an implicit OptionT[List]. The list will contain options in our case
 
   // the type means: list of Options of Int (middle, left, right)
   val listOfNumberOptions: OptionT[List, Int] = OptionT(List(Option(1), Option(2)))
@@ -62,9 +64,10 @@ object MonadTransformers {
   // Returns Right("servers support surge") or Left with explanation why not (either server unreachable or bandwidth too low)
   // Hint: call canWithstandSurge + transform
   import cats.instances.future.given
+  // transform method changes the deeply nested Either without unwrapping the outer monad
   def generateTrafficSpikeReport(s1: String, s2: String): AsyncResponse[String] = canWithstandSurge(s1, s2).transform {
     case Right(false) => Left(s"Servers $s1 and $s2 CANNOT cope with the incoming spike: not enough total bandwidth")
-    case Right(true)  => Right("Servers $s1 and $s2 can cope with the incoming spike NO PROBLEM")
+    case Right(true)  => Right(s"Servers $s1 and $s2 can cope with the incoming spike NO PROBLEM")
     case Left(error)  => Left(s"Servers $s1 and $s2 CANNOT cope with the incoming spike: $error")
   }
   // ^^^^^^^^^^^^^^^                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -75,7 +78,13 @@ object MonadTransformers {
     canWithstandSurge("server1.rockthejvm.com", "server2.rockthejvm.com").value.foreach(println)
     canWithstandSurge("server1.rockthejvm.com", "server3.rockthejvm.com").value.foreach(println)
     canWithstandSurge("server4.rockthejvm.com", "server5.rockthejvm.com").value.foreach(println)
-    val resultFuture = generateTrafficSpikeReport("server1.rockthejvm.com", "server2.rockthejvm.com").value
-    resultFuture.foreach(println)
+    val goodResultFuture = generateTrafficSpikeReport("server1.rockthejvm.com", "server2.rockthejvm.com").value
+    goodResultFuture.foreach(println)
+    val insufficientBandwidthResultFuture =
+      generateTrafficSpikeReport("server1.rockthejvm.com", "server3.rockthejvm.com").value
+    insufficientBandwidthResultFuture.foreach(println)
+    val unreachableServerResultFuture =
+      generateTrafficSpikeReport("server5.rockthejvm.com", "server3.rockthejvm.com").value
+    unreachableServerResultFuture.foreach(println)
   }
 }
