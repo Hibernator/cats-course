@@ -3,6 +3,7 @@ package part3datamanipulation
 import cats.Semigroup
 
 import scala.annotation.tailrec
+import scala.util.Try
 
 object DataValidation {
 
@@ -67,8 +68,103 @@ object DataValidation {
       .combine(Validated.cond(n <= 100, n, List("Number must be <= 100")))
       .combine(Validated.cond(testPrime(n), n, List("Number must be a prime")))
 
+  // chaining Validated
+  // andThen function - works like flatMap but doesn't short-circuit in case the original value is invalid
+  // that's why it's not called flatMap
+  aValidValue.andThen(_ => anInvalidValue) // if the aValidValue was invalid, nothing would happen
+
+  // test a validated value, with an invalid fallback in case the test fails
+  aValidValue.ensure(List("Something went wrong"))(_ % 2 == 0)
+
+  // transform
+  aValidValue.map(_ + 1)
+  aValidValue.leftMap(_.length)
+  aValidValue.bimap(_.length, _ + 1)
+
+  // interop with Scala stdlib - mainly with Either, Option, Try
+  val eitherToValidated: Validated[List[String], Int] = Validated.fromEither(Right(42))
+  val optionToValidated: Validated[List[String], Int] = Validated.fromOption(Some(42), List("Nothing is present here"))
+  val tryToValidated: Validated[Throwable, Int] = Validated.fromTry(Try("something".toInt))
+
+  // backwards API
+  aValidValue.toOption
+  aValidValue.toEither
+  // no method to transform to Try because the error type is missing
+
+  // Exercise 2 - form validation
+  object FormValidation {
+    type FormValidation[T] = Validated[List[String], T]
+
+    def getValue(form: Map[String, String], fieldName: String): FormValidation[String] =
+      Validated.fromOption(form.get(fieldName), List(s"The field $fieldName must be specified"))
+
+    // Daniel's validation functions
+    def nonBlank(value: String, fieldName: String): FormValidation[String] =
+      Validated.cond(value.length > 0, value, List(s"The field $fieldName must be not blank"))
+
+    def emailProperForm(email: String): FormValidation[String] =
+      Validated.cond(email.contains("@"), email, List("Email is invalid"))
+
+    def passwordCheck(password: String): FormValidation[String] =
+      Validated.cond(password.length >= 10, password, List("Password must be at least 10 characters long"))
+
+    /*
+      Fields are:
+      - name
+      - email
+      - password
+
+      Rules are:
+      - name, email and password must be specified
+      - name must not be blank
+      - email must have "@"
+      - password must have >= 10 characters
+
+      If the validation is successful, return Valid("Success")
+     */
+    def validateForm(form: Map[String, String]): FormValidation[String] =
+      val nameValidated =
+        getValue(form, "name").ensure(List("Name is blank"))(!_.isBlank)
+      val emailValidated = getValue(form, "email")
+        .ensure(List("Email doesn't have @"))(_.contains("@"))
+      val passwordValidated = getValue(form, "password")
+        .ensure(List("Password has less than 10 characters"))(_.length >= 10)
+
+      nameValidated.combine(emailValidated).combine(passwordValidated).map(_ => "Success")
+
+    def validateFormDaniel(form: Map[String, String]): FormValidation[String] =
+      getValue(form, "name")
+        .andThen(nonBlank(_, "name"))
+        // Semigroup of String is needed too, for combining the valid values
+        .combine(getValue(form, "email").andThen(emailProperForm))
+        .combine(getValue(form, "password").andThen(passwordCheck))
+        .map(_ => "Success")
+  }
+
+  val validForm = Map(
+    "name" -> "Bolton",
+    "email" -> "bolton@dreadfort.com",
+    "password" -> "reallystrongpassword"
+  )
+
+  val invalidForm = Map(
+    "email" -> "boltonAtdreadfort.com",
+    "password" -> "short"
+  )
+
+  val validFormValidation = FormValidation.validateForm(validForm)
+  val invalidFormValidation = FormValidation.validateForm(invalidForm)
+
+  // Nice API
+  import cats.syntax.validated.*
+
+  val aValidMeaningOfLife: Validated[List[String], Int] = 42.valid[List[String]]
+  val anError: Validated[String, Int] = "Something is invalid".invalid[Int]
+
   def main(args: Array[String]): Unit = {
     println(testNumber(2))
     println(testNumber(102))
+    println(DataValidation.validFormValidation)
+    println(DataValidation.invalidFormValidation)
   }
 }

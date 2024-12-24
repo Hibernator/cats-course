@@ -52,6 +52,7 @@ object Writers {
   val (l, v): (List[String], Int) = aWriter.run
 
   // Benefit #1: writers can deal with logs and tracking changes in a purely functional way
+  // Can use them to rewrite stack-recursion into tail-recursion
 
   // TO DO 1: rewrite a function that "prints" things with writers
   // this a stack-recursive function
